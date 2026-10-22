@@ -6,19 +6,6 @@
 
 **Nota**: Este checklist é gerado pelo comando `/speckit.checklist` com base no contexto e nos requisitos da funcionalidade.
 
-<!--
-  ============================================================================
-  IMPORTANTE: Os itens abaixo são EXEMPLOS apenas para ilustração.
-
-  O comando /speckit.checklist DEVE substituir estes exemplos por itens reais:
-  - Solicitação específica de checklist do usuário
-  - Requisitos da spec.md
-  - Contexto técnico do plan.md
-  - Detalhes de implementação do tasks.md
-
-  NÃO mantenha estes itens de exemplo no arquivo gerado.
-  ============================================================================
--->
 
 ## [Categoria 1]
 

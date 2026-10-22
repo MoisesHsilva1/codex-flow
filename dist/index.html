@@ -1,0 +1,253 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Codex Flow — uma fundação simples para explorar, planejar, executar e revisar mudanças de software." />
+    <title>Codex Flow</title>
+    <style>
+      :root { color-scheme:dark; --paper:#0d0d0d; --ink:#f2f1ed; --muted:#98958d; --line:#292929; --soft:#191919; --blue:#84aaff; --blue-soft:#18233a; --green:#75c89b; --yellow:#e7b95d; --card:#141414; --note:#191711; --max:1180px; }
+      :root[data-theme="light"] { color-scheme:light; --paper:#fbfaf8; --ink:#252422; --muted:#77736b; --line:#e8e5df; --soft:#f2f0eb; --blue:#2f6fed; --blue-soft:#eaf1ff; --green:#3d7b5f; --yellow:#f3bf4b; --card:#fff; --note:#fffdf7; }
+      * { box-sizing:border-box; }
+      html { scroll-behavior:smooth; }
+      body { margin:0; color:var(--ink); background:var(--paper); font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; line-height:1.6; }
+      a { color:inherit; text-decoration:none; }
+      button { font:inherit; }
+      .shell { display:grid; grid-template-columns:250px minmax(0, 1fr); min-height:100vh; }
+      .sidebar { position:sticky; top:0; height:100vh; border-right:1px solid var(--line); padding:28px 18px; background:#111; }
+      :root[data-theme="light"] .sidebar { background:#f7f6f3; }
+      .brand { display:flex; gap:10px; align-items:center; padding:0 10px 30px; font-weight:700; letter-spacing:-.02em; }
+      .brand-mark { display:grid; place-items:center; width:28px; height:28px; border-radius:7px; background:var(--ink); color:var(--paper); font-size:14px; }
+      .eyebrow { color:var(--muted); font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+      .nav-label { padding:0 10px 8px; color:#a09c93; font-size:11px; font-weight:700; letter-spacing:.1em; text-transform:uppercase; }
+      nav a { display:flex; gap:9px; align-items:center; margin:2px 0; padding:7px 10px; border-radius:6px; color:#706d66; font-size:13px; }
+      nav a:hover, nav a.active { background:#202020; color:var(--ink); }
+      :root[data-theme="light"] nav a:hover, :root[data-theme="light"] nav a.active { background:#e9e7e2; }
+      nav .dot { width:6px; height:6px; border-radius:50%; background:#c7c3ba; }
+      nav a.active .dot { background:var(--blue); }
+      .main { min-width:0; }
+      .topbar { display:flex; justify-content:space-between; align-items:center; max-width:var(--max); margin:auto; padding:20px 34px; color:var(--muted); font-size:12px; }
+      .topbar .status { display:flex; gap:8px; align-items:center; }
+      .hero { max-width:var(--max); margin:auto; padding:92px 34px 104px; }
+      .hero-grid { display:grid; grid-template-columns:minmax(0, 1.3fr) minmax(260px, .7fr); gap:72px; align-items:end; }
+      h1,h2,h3,p { margin-top:0; }
+      h1 { max-width:730px; margin-bottom:24px; font-family: Georgia, "Times New Roman", serif; font-size:clamp(48px, 7vw, 86px); font-weight:400; letter-spacing:-.065em; line-height:.98; }
+      .hero-copy { max-width:590px; color:#5f5b54; font-size:18px; }
+      .hero-copy strong { color:var(--ink); font-weight:600; }
+      .hero-actions { display:flex; gap:10px; flex-wrap:wrap; margin-top:32px; }
+      .button { display:inline-flex; gap:8px; align-items:center; padding:10px 15px; border:1px solid var(--ink); border-radius:6px; background:var(--ink); color:var(--paper); font-size:13px; font-weight:650; cursor:pointer; }
+      .button.secondary { border-color:var(--line); background:transparent; color:var(--ink); }
+      .button:hover { transform:translateY(-1px); }
+      .hero-note { padding:22px; border-left:2px solid var(--yellow); background:var(--note); color:var(--muted); font-size:13px; }
+      .hero-note strong { display:block; margin-bottom:8px; color:var(--ink); font-size:14px; }
+      .section { border-top:1px solid var(--line); }
+      .section-inner { max-width:var(--max); margin:auto; padding:92px 34px; }
+      .section-heading { display:grid; grid-template-columns:1fr 1.6fr; gap:50px; margin-bottom:48px; }
+      h2 { margin-bottom:14px; font-family:Georgia, "Times New Roman", serif; font-size:clamp(34px, 4vw, 52px); font-weight:400; letter-spacing:-.05em; line-height:1.05; }
+      .lead { max-width:590px; color:#6c6860; font-size:16px; }
+      .workflow { display:grid; grid-template-columns:repeat(5, 1fr); border-top:1px solid var(--line); border-bottom:1px solid var(--line); }
+      .step { min-height:170px; padding:20px 16px 18px; border-right:1px solid var(--line); }
+      .step:last-child { border-right:0; }
+      .step-number { color:var(--blue); font-size:12px; font-weight:700; }
+      .step h3 { margin:36px 0 6px; font-size:15px; }
+      .step p { margin:0; color:var(--muted); font-size:12px; line-height:1.5; }
+      .doc-grid { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:14px; }
+      .doc-card { display:block; min-height:220px; padding:24px; border:1px solid var(--line); border-radius:10px; background:var(--card); transition:.2s ease; }
+      .doc-card:hover { border-color:#c9c5bd; box-shadow:0 8px 26px rgba(46,43,38,.06); transform:translateY(-2px); }
+      .model-card { cursor:pointer; }
+      .model-card.selected { border-color:var(--blue); box-shadow:0 0 0 2px var(--blue-soft); }
+      .card-icon { display:grid; place-items:center; width:31px; height:31px; margin-bottom:30px; border-radius:7px; background:var(--blue-soft); color:var(--blue); font-size:14px; font-weight:800; }
+      .doc-card h3 { margin-bottom:7px; font-size:18px; letter-spacing:-.02em; }
+      .doc-card p { margin:0; color:var(--muted); font-size:13px; }
+      .tag { display:inline-block; margin-top:22px; padding:3px 7px; border-radius:4px; background:var(--soft); color:#777269; font-size:10px; font-weight:700; letter-spacing:.07em; text-transform:uppercase; }
+      .detail { display:grid; grid-template-columns:180px minmax(0, 1fr); gap:50px; padding:70px 0; border-top:1px solid var(--line); scroll-margin-top:24px; }
+      .detail:first-of-type { border-top:0; }
+      .detail-meta { color:var(--muted); font-size:12px; }
+      .detail-meta strong { display:block; margin-bottom:7px; color:var(--ink); font-size:14px; }
+      .detail h3 { margin-bottom:10px; font-size:26px; letter-spacing:-.04em; }
+      .detail p { max-width:700px; color:#625e57; }
+      .detail ul { display:grid; grid-template-columns:repeat(2, minmax(0, 1fr)); gap:10px 30px; max-width:720px; margin:22px 0 0; padding:0; list-style:none; }
+      .detail li { position:relative; padding-left:18px; color:#625e57; font-size:13px; }
+      .detail li::before { content:""; position:absolute; top:.65em; left:0; width:5px; height:5px; border-radius:50%; background:var(--blue); }
+      .code-box { display:flex; justify-content:space-between; gap:20px; align-items:center; max-width:700px; margin-top:24px; padding:13px 15px; border:1px solid var(--line); border-radius:7px; background:var(--soft); color:var(--muted); font-family:ui-monospace, SFMono-Regular, Menlo, monospace; font-size:12px; }
+      .preview { margin-top:30px; overflow:hidden; border:1px solid var(--line); border-radius:10px; background:#111; }
+      .preview-bar { display:flex; justify-content:space-between; align-items:center; padding:11px 15px; border-bottom:1px solid #292929; color:#aaa69d; font-size:12px; }
+      .preview-bar span:first-child { color:#f1eee8; font-family:ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .preview pre { overflow:auto; margin:0; padding:22px; color:#d6d3cc; font:12px/1.75 ui-monospace, SFMono-Regular, Menlo, monospace; }
+      .preview pre .accent { color:#91b4ff; }
+      .copy { border:0; background:transparent; color:var(--blue); font-size:12px; cursor:pointer; }
+      .note-grid { display:grid; grid-template-columns:repeat(3, 1fr); gap:14px; }
+      .note-card { padding:20px; border:1px solid var(--line); border-radius:8px; background:var(--card); }
+      .note-card h3 { margin-bottom:7px; font-size:15px; }
+      .note-card p { margin:0; color:var(--muted); font-size:13px; }
+      footer { border-top:1px solid var(--line); }
+      footer .section-inner { display:flex; justify-content:space-between; gap:20px; padding-top:32px; padding-bottom:40px; color:var(--muted); font-size:12px; }
+      .theme-toggle { display:inline-flex; gap:7px; align-items:center; border:1px solid var(--line); border-radius:6px; padding:7px 10px; background:var(--card); color:var(--ink); font-size:12px; cursor:pointer; }
+      .theme-toggle:hover { border-color:var(--muted); }
+      .mobile-menu { display:none; }
+      @media (max-width:850px) { .shell { display:block; } .sidebar { position:fixed; z-index:5; inset:0 auto 0 0; width:250px; transform:translateX(-100%); transition:transform .2s; box-shadow:10px 0 30px rgba(0,0,0,.3); } .sidebar.open { transform:translateX(0); } .mobile-menu { display:inline-flex; border:1px solid var(--line); border-radius:6px; background:var(--card); color:var(--ink); padding:7px 10px; cursor:pointer; } .topbar { padding:16px 22px; } .hero, .section-inner { padding-right:22px; padding-left:22px; } .hero-grid, .section-heading { grid-template-columns:1fr; gap:30px; } .workflow { grid-template-columns:1fr; } .step { min-height:auto; border-right:0; border-bottom:1px solid var(--line); } .step:last-child { border-bottom:0; } .step h3 { margin-top:12px; } .detail { grid-template-columns:1fr; gap:14px; padding:48px 0; } .doc-grid, .note-grid, .detail ul { grid-template-columns:1fr; } footer .section-inner { display:block; } }
+    </style>
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" id="sidebar">
+        <div class="brand"><span>Codex Flow</span></div>
+        <div class="nav-label">Navegar</div>
+        <nav aria-label="Navegação principal">
+          <a class="active" href="#inicio"><span class="dot"></span>Visão geral</a>
+          <a href="#trilha"><span class="dot"></span>Trilha guiada</a>
+          <a href="#setup"><span class="dot"></span>Instalar no Codex</a>
+          <a href="#skills"><span class="dot"></span>Skills</a>
+          <a href="#models"><span class="dot"></span>Modelos de AGENTS</a>
+          <a href="#mcps"><span class="dot"></span>MCPs recomendados</a>
+          <a href="#documentacao"><span class="dot"></span>Documentação</a>
+        </nav>
+      </aside>
+
+      <main class="main">
+        <header class="topbar"><button class="mobile-menu" id="menu" aria-label="Abrir navegação">☰</button><button class="theme-toggle" id="theme-toggle" type="button" aria-label="Mudar tema"><span id="theme-icon">☼</span><span id="theme-label">Light mode</span></button></header>
+
+        <section class="hero" id="inicio">
+          <div class="hero-grid">
+            <div>
+              <h1>Menos improviso. Mais clareza para o Codex.</h1>
+              <p class="hero-copy">Uma fundação pequena para transformar pedidos de desenvolvimento em trabalho rastreável: <strong>explorar, planejar, executar, revisar e concluir.</strong></p>
+              <div class="hero-actions"><a class="button" href="#trilha">Começar a trilha <span>↓</span></a><a class="button secondary" href="#setup">Preparar o Codex</a></div>
+            </div>
+            <div class="hero-note"><strong>Como pensar neste kit</strong>O Codex analisa e executa. A pessoa decide quando existe impacto real em arquitetura, dados, segurança, contratos ou escopo.</div>
+          </div>
+        </section>
+
+        <section class="section" id="setup">
+          <div class="section-inner">
+            <div class="section-heading"><div><div class="eyebrow">Setup rápido</div><h2>Leve o kit para o seu Codex.</h2></div><p class="lead">O instalador é deliberadamente conservador: cria o diretório de skills, copia somente o que ainda não existe e nunca mexe no seu <code>AGENTS.md</code> global.</p></div>
+            <div class="doc-grid">
+              <div class="doc-card"><div class="card-icon">1</div><h3>Instalação global</h3><p>Clone o repositório e execute o script. As skills passam a ficar disponíveis para seus projetos no Codex.</p><div class="code-box"><span>bash scripts/install-codex.sh</span><button class="copy" data-copy="bash scripts/install-codex.sh">Copiar</button></div><span class="tag">não sobrescreve</span></div>
+              <div class="doc-card"><div class="card-icon">2</div><h3>Instalação por projeto</h3><p>Copie `.codex/skills/` e `AGENTS.md` para o seu repositório quando quiser manter tudo versionado junto ao código.</p><div class="code-box"><span>cp -R .codex/skills /seu-projeto/.codex/</span><button class="copy" data-copy="cp -R .codex/skills /seu-projeto/.codex/">Copiar</button></div><span class="tag">versionado</span></div>
+            </div>
+            <div class="hero-note" style="margin-top:18px"><strong>Depois de instalar</strong>Abra uma nova sessão do Codex no projeto. Confira as skills disponíveis e, se quiser regras globais, revise manualmente <code>templates/AGENTS.global.md</code> antes de copiá-lo para <code>~/.codex/AGENTS.md</code>.</div>
+          </div>
+        </section>
+
+        <section class="section" id="trilha">
+          <div class="section-inner">
+            <div class="section-heading"><div><div class="eyebrow">Trilha guiada</div><h2>Aprenda na ordem certa.</h2></div><p class="lead">Você não precisa dominar tudo antes de começar. Siga uma tarefa por etapa, pratique no seu próprio repositório e avance quando conseguir explicar o que o Codex fez e por quê.</p></div>
+            <div class="workflow">
+              <div class="step"><span class="step-number">01</span><h3>Entenda</h3><p>Leia o guia básico e identifique agente, prompt, skill, MCP e ferramenta.</p></div>
+              <div class="step"><span class="step-number">02</span><h3>Oriente</h3><p>Adapte o `AGENTS.md` local com estrutura, comandos reais e restrições do projeto.</p></div>
+              <div class="step"><span class="step-number">03</span><h3>Pratique</h3><p>Peça uma investigação pequena e observe exploração, plano, execução e evidências.</p></div>
+              <div class="step"><span class="step-number">04</span><h3>Amplie</h3><p>Adicione um MCP útil e use uma skill específica quando o problema pedir.</p></div>
+              <div class="step"><span class="step-number">05</span><h3>Delegue</h3><p>Experimente multiagente somente com tarefas independentes e briefs delimitados.</p></div>
+            </div>
+            <div class="hero-note" style="margin-top:18px"><strong>Exercício recomendado</strong>Escolha um bug pequeno no seu projeto. Primeiro peça apenas exploração e plano. Depois autorize a implementação, peça a revisão do diff e encerre com os testes executados. <a href="https://github.com/MoisesHsilva1/workflow-ia/blob/main/docs/codex-essentials.md" style="color:var(--blue)">Ver o conteúdo completo da trilha →</a></div>
+            <div class="hero-actions"><a class="button" href="https://github.com/MoisesHsilva1/workflow-ia/blob/main/docs/guide-basic.md" target="_blank" rel="noreferrer">Começar pelos fundamentos <span>↗</span></a><a class="button secondary" href="#setup">Preparar meu Codex</a></div>
+          </div>
+        </section>
+
+        <section class="section" id="skills">
+          <div class="section-inner">
+            <div class="section-heading"><div><div class="eyebrow">.codex/skills</div><h2>Cada skill tem uma responsabilidade.</h2></div><p class="lead">Skills são instruções progressivas: o Codex descobre pelo nome e descrição, e só carrega o procedimento completo quando o contexto pede.</p></div>
+            <div class="doc-grid">
+              <a class="doc-card" href="#basic-workflow"><div class="card-icon">↗</div><h3>basic-workflow</h3><p>Coordena o ciclo completo e define quando parar para uma decisão humana.</p><span class="tag">coordenação</span></a>
+              <a class="doc-card" href="#exploration"><div class="card-icon">⌕</div><h3>codebase-exploration</h3><p>Investiga uma área localizada sem editar arquivos durante a exploração.</p><span class="tag">investigação</span></a>
+              <a class="doc-card" href="#debugging"><div class="card-icon">⌁</div><h3>systematic-debugging</h3><p>Conecta sintoma, hipótese, experimento, causa raiz e regressão.</p><span class="tag">depuração</span></a>
+              <a class="doc-card" href="#review"><div class="card-icon">✓</div><h3>code-review</h3><p>Revisa diffs por severidade, evidência, contratos e riscos de regressão.</p><span class="tag">qualidade</span></a>
+              <a class="doc-card" href="#test-strategy"><div class="card-icon">T</div><h3>test-strategy</h3><p>Escolhe o nível de teste que realmente prova o comportamento alterado.</p><span class="tag">testes</span></a>
+              <a class="doc-card" href="#verification"><div class="card-icon">V</div><h3>verification-before-completion</h3><p>Impede que o Codex declare uma entrega sem evidência executada.</p><span class="tag">verificação</span></a>
+              <a class="doc-card" href="#security-audit"><div class="card-icon">S</div><h3>security-audit</h3><p>Procura caminhos de ataque, secrets expostos e controles ausentes.</p><span class="tag">segurança</span></a>
+              <a class="doc-card" href="#dependency-audit"><div class="card-icon">D</div><h3>dependency-audit</h3><p>Avalia pacotes, lockfiles, vulnerabilidades e impacto de upgrades.</p><span class="tag">dependências</span></a>
+              <a class="doc-card" href="#git-worktree"><div class="card-icon">G</div><h3>git-worktree</h3><p>Cria isolamento para tarefas paralelas sem misturar alterações.</p><span class="tag">git</span></a>
+              <a class="doc-card" href="#grill-me"><div class="card-icon">?</div><h3>grill-me</h3><p>Pressiona planos e designs com perguntas difíceis antes do código.</p><span class="tag">manual</span></a>
+            </div>
+            <div class="detail" id="basic-workflow"><div class="detail-meta"><strong>01 · basic-workflow</strong>O ponto de entrada</div><div><h3>Coordenação sem burocracia</h3><p>Use para bugs, pequenas funcionalidades, refatorações e documentação. A skill mantém o trabalho no agente principal e delega somente quando uma investigação independente ou revisão delimitada realmente ajuda.</p><ul><li>Não inventa requisitos ou contratos.</li><li>Preserva alterações fora do escopo.</li><li>Exige evidências no encerramento.</li><li>Interrompe em decisões materiais.</li></ul></div></div>
+            <div class="detail" id="exploration"><div class="detail-meta"><strong>02 · codebase-exploration</strong>Antes da mudança</div><div><h3>Entender antes de editar</h3><p>Mapeia instruções, entrypoints, fluxo de dados, dependências, contratos e testes relevantes. É localizada por padrão: segue as chamadas apenas até o limite necessário para responder à pergunta.</p><ul><li>Somente leitura durante a exploração.</li><li>Compara documentação, código e testes.</li><li>Registra fatos, inferências e lacunas.</li><li>Não copia secrets para o contexto.</li></ul></div></div>
+            <div class="detail" id="debugging"><div class="detail-meta"><strong>03 · systematic-debugging</strong>Quando algo falha</div><div><h3>Do sintoma à causa raiz</h3><p>Começa pela reprodução do comportamento. Depois ordena hipóteses por evidência, testa a menor hipótese possível, corrige a causa e repete a verificação com uma regressão automatizada quando aplicável.</p><ul><li>Reprodução antes da correção.</li><li>Experimentos pequenos e falsificáveis.</li><li>Correção sem refatoração oportunista.</li><li>Limitações declaradas com honestidade.</li></ul></div></div>
+            <div class="detail" id="review"><div class="detail-meta"><strong>04 · code-review</strong>Antes de integrar</div><div><h3>Revisão baseada em risco</h3><p>Inspeciona o diff completo e os contratos adjacentes. Os achados são ordenados por severidade e sempre incluem arquivo, evidência, impacto e correção sugerida.</p><ul><li>Bloqueante, alta, média ou baixa.</li><li>Sucesso, erro e entradas inválidas.</li><li>Segurança e compatibilidade.</li><li>Testes executados e lacunas.</li></ul></div></div>
+            <div class="detail" id="test-strategy"><div class="detail-meta"><strong>05 · test-strategy</strong>Provar comportamento</div><div><h3>Testes com propósito</h3><p>Escolhe o nível mínimo que oferece confiança: unitário, integração, contrato ou end-to-end. Para bugs, prioriza uma regressão que demonstre o sintoma.</p><ul><li>Testes determinísticos.</li><li>Mocks somente quando necessários.</li><li>Suíte focada antes da suíte geral.</li><li>Lacunas declaradas.</li></ul></div></div>
+            <div class="detail" id="verification"><div class="detail-meta"><strong>06 · verification-before-completion</strong>Antes de concluir</div><div><h3>Sem evidência, sem conclusão</h3><p>Releia os critérios, revise o diff e execute os comandos relevantes. A skill separa o que foi verificado do que permaneceu limitado pelo ambiente.</p><ul><li>Confere escopo real.</li><li>Lê a saída dos comandos.</li><li>Não confunde não executado com aprovado.</li><li>Registra riscos residuais.</li></ul></div></div>
+            <div class="detail" id="security-audit"><div class="detail-meta"><strong>07 · security-audit</strong>Quando há risco</div><div><h3>Auditoria sem mudanças automáticas</h3><p>Traça entradas não confiáveis até sinks perigosos e avalia autenticação, autorização, validação, limites e exposição de dados.</p><ul><li>Read-only por padrão.</li><li>Segredos nunca são copiados.</li><li>Achados têm evidência e severidade.</li><li>Hipóteses são separadas de confirmações.</li></ul></div></div>
+            <div class="detail" id="dependency-audit"><div class="detail-meta"><strong>08 · dependency-audit</strong>Antes de mudar pacotes</div><div><h3>Dependências sob controle</h3><p>Verifica necessidade, compatibilidade, manutenção, licença, vulnerabilidades, impacto no build e reprodutibilidade dos lockfiles.</p><ul><li>Diretas e transitivas.</li><li>Sem upgrades em massa.</li><li>Advisories contextualizados.</li><li>Impacto documentado.</li></ul></div></div>
+            <div class="detail" id="git-worktree"><div class="detail-meta"><strong>09 · git-worktree</strong>Para trabalho paralelo</div><div><h3>Isolamento sem susto</h3><p>Usa worktrees somente quando o paralelismo oferece benefício real e preserva alterações, branches, ambientes e decisões do usuário.</p><ul><li>Caminho e branch explícitos.</li><li>Sem reset destrutivo.</li><li>Handoff reproduzível.</li><li>Limpeza só com autorização.</li></ul></div></div>
+            <div class="detail" id="grill-me"><div class="detail-meta"><strong>10 · grill-me</strong>Antes de aprovar</div><div><h3>Uma entrevista que encontra as perguntas certas</h3><p>Invocada manualmente quando um plano ou design precisa ser tensionado. Explora decisões em ordem de dependência e pergunta somente o que pode mudar a implementação.</p><ul><li>Uma pergunta por vez.</li><li>Recomendação junto da pergunta.</li><li>Busca fatos no repositório.</li><li>Não implementa com decisões críticas abertas.</li></ul></div></div>
+          </div>
+        </section>
+
+        <section class="section" id="models">
+          <div class="section-inner"><div class="section-heading"><div><div class="eyebrow">templates/agents</div><h2>Comece com o modelo certo.</h2></div><p class="lead">Escolha primeiro a camada de instrução e depois a stack. Clique em um card para visualizar o modelo e copiar o comando.</p></div><div class="doc-grid"><div class="doc-card model-card" data-model="global" role="button" tabindex="0" aria-pressed="false"><div class="card-icon">G</div><h3>Global</h3><p>Preferências universais para o Codex. Não inclui comandos ou arquitetura de um projeto.</p><span class="tag">~/.codex/AGENTS.md</span></div><div class="doc-card model-card" data-model="project" role="button" tabindex="0" aria-pressed="false"><div class="card-icon">P</div><h3>Projeto</h3><p>Propósito, estrutura, comandos reais, convenções e restrições do repositório.</p><span class="tag">AGENTS.md</span></div><div class="doc-card model-card selected" data-model="web" role="button" tabindex="0" aria-pressed="true"><div class="card-icon">W</div><h3>Web</h3><p>React + Vite + TypeScript e Next.js, com orientações para componentes e rotas.</p><span class="tag">react · next</span></div><div class="doc-card model-card" data-model="api" role="button" tabindex="0" aria-pressed="false"><div class="card-icon">A</div><h3>APIs</h3><p>Node.js/TypeScript e Python/FastAPI, com contratos, erros, integrações e testes.</p><span class="tag">node · fastapi</span></div><div class="doc-card model-card" data-model="service" role="button" tabindex="0" aria-pressed="false"><div class="card-icon">S</div><h3>Serviços</h3><p>Java/Spring Boot, Go e Rust, com estrutura, concorrência, testes e segurança.</p><span class="tag">java · go · rust</span></div><div class="doc-card model-card" data-model="monorepo" role="button" tabindex="0" aria-pressed="false"><div class="card-icon">M</div><h3>Monorepos</h3><p>TypeScript com apps, packages, workspaces e fronteiras entre pacotes.</p><span class="tag">typescript</span></div></div><div class="preview"><div class="preview-bar"><span id="preview-title">AGENTS.md · react-vite-typescript</span><button class="copy" id="copy-model" data-copy="cp templates/agents/react-vite-typescript.md AGENTS.md">Copiar modelo</button></div><pre id="preview-content"><span class="accent"># Repository Guidelines</span>
+
+Este repositório é uma aplicação SPA construída com Vite, React e TypeScript.
+
+<span class="accent">## Estrutura do projeto</span>
+
+- `src/`: código da aplicação.
+- `src/components/`: componentes reutilizáveis.
+- `src/hooks/`: hooks compartilhados.
+- `src/main.tsx`: ponto de entrada.
+
+<span class="accent">## Comandos</span>
+
+`npm install` · `npm run dev` · `npm run lint` · `npm run test` · `npm run build`
+
+<span class="accent">## Padrões React e TypeScript</span>
+
+- Use componentes funcionais e TypeScript.
+- Evite `any` e preserve a arquitetura existente.
+- Verifique mudanças visuais em desktop e mobile.</pre></div></div>
+        </section>
+
+        <section class="section" id="mcps">
+          <div class="section-inner">
+            <div class="section-heading"><div><div class="eyebrow">MCPs</div><h2>Conecte o Codex ao trabalho real.</h2></div><p class="lead">MCPs dão acesso a serviços externos. Comece com um servidor oficial, escolha o menor nível de permissão e só amplie quando existir uma necessidade concreta.</p></div>
+            <div class="doc-grid">
+              <a class="doc-card" href="https://github.com/github/github-mcp-server" target="_blank" rel="noreferrer"><div class="card-icon">G</div><h3>GitHub</h3><p>Crie PRs, consulte issues, revise código e interaja com repositórios no ciclo de entrega.</p><span class="tag">alta · código · CI</span></a>
+              <a class="doc-card" href="https://context7.com/docs/resources/all-clients" target="_blank" rel="noreferrer"><div class="card-icon">C</div><h3>Context7</h3><p>Consulte documentação atualizada e exemplos da versão real das bibliotecas e frameworks.</p><span class="tag">alta · documentação</span></a>
+              <a class="doc-card" href="https://help.figma.com/hc/en-us/articles/39216419318551-Get-started-with-the-Figma-MCP-server" target="_blank" rel="noreferrer"><div class="card-icon">F</div><h3>Figma</h3><p>Leia designs, componentes, variáveis e detalhes do sistema visual para implementar interfaces fiéis.</p><span class="tag">média · design</span></a>
+              <a class="doc-card" href="https://github.com/microsoft/playwright-mcp" target="_blank" rel="noreferrer"><div class="card-icon">P</div><h3>Playwright</h3><p>Automatize navegadores e teste fluxos reais de aplicações web, incluindo interações e estados visuais.</p><span class="tag">média · browser</span></a>
+              <a class="doc-card" href="https://developers.openai.com/learn/docs-mcp" target="_blank" rel="noreferrer"><div class="card-icon">O</div><h3>OpenAI Docs</h3><p>Consulte a documentação oficial de OpenAI, Codex, APIs e MCP diretamente no editor.</p><span class="tag">alta · OpenAI</span></a>
+            </div>
+            <div class="hero-note" style="margin-top:18px"><strong>Regra para começar</strong>Um MCP aumenta o alcance do agente, então também aumenta o impacto de uma configuração insegura. Prefira servidor oficial, credenciais separadas, acesso mínimo e ambiente de desenvolvimento. <a href="https://github.com/MoisesHsilva1/workflow-ia/blob/main/docs/mcp-recommendations.md" style="color:var(--blue)">Ler a recomendação completa →</a></div>
+          </div>
+        </section>
+
+        <section class="section" id="documentacao">
+          <div class="section-inner"><div class="section-heading"><div><div class="eyebrow">docs/</div><h2>Documentação que não compete com o código.</h2></div><p class="lead">Cada documento tem um trabalho claro: instalar, aprender, escolher um MCP ou registrar uma decisão.</p></div><div class="doc-grid"><div class="doc-card"><div class="card-icon">→</div><h3>installation.md</h3><p>Explica instalação seletiva, por projeto e global no Codex, sem alterar configurações automaticamente.</p><span class="tag">distribuição</span></div><div class="doc-card"><div class="card-icon">?</div><h3>guide-basic.md</h3><p>Apresenta agentes, skills, AGENTS.md, prompts e ferramentas em linguagem para iniciantes.</p><span class="tag">comece aqui</span></div><div class="doc-card"><div class="card-icon">E</div><h3>codex-essentials.md</h3><p>Trilha progressiva sobre fundamentos, desenvolvimento agentic, multiagente e operação profissional.</p><span class="tag">educação</span></div><div class="doc-card"><div class="card-icon">M</div><h3>mcp-recommendations.md</h3><p>Recomenda GitHub, Context7, Figma, Playwright e OpenAI Docs, com configuração e cuidados.</p><span class="tag">integrações</span></div><div class="doc-card"><div class="card-icon">A</div><h3>adr/</h3><p>Guarda decisões arquiteturais reais, com contexto, alternativas, decisão e consequências.</p><span class="tag">decisões</span></div></div></div>
+        </section>
+
+        <footer><div class="section-inner"><span>Codex Flow · foundation for better changes</span><span>PT-BR</span></div></footer>
+      </main>
+    </div>
+    <script>
+      const sidebar = document.querySelector('#sidebar');
+      document.querySelector('#menu').addEventListener('click', () => sidebar.classList.toggle('open'));
+      document.querySelectorAll('nav a').forEach((link) => link.addEventListener('click', () => sidebar.classList.remove('open')));
+      const links = [...document.querySelectorAll('nav a')];
+      const sections = links.map((link) => document.querySelector(link.getAttribute('href'))).filter(Boolean);
+      const observer = new IntersectionObserver((entries) => entries.forEach((entry) => { if (entry.isIntersecting) { links.forEach((link) => link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id)); } }), { rootMargin: '-25% 0px -65% 0px' });
+      sections.forEach((section) => observer.observe(section));
+      document.querySelectorAll('[data-copy]').forEach((button) => button.addEventListener('click', async () => { await navigator.clipboard.writeText(button.dataset.copy); const original = button.textContent; button.textContent = 'Copiado'; setTimeout(() => { button.textContent = original; }, 1200); }));
+      const modelPreviews = {
+        global: { title: '~/.codex/AGENTS.md · global', command: 'cp templates/AGENTS.global.md ~/.codex/AGENTS.md', content: '<span class="accent"># Instruções Globais Opcionais</span>\n\nUse somente regras universais, curtas e de baixo acoplamento.\n\n<span class="accent">## Desenvolvimento</span>\n\n- Inspecione o código relevante antes de alterar arquivos.\n- Siga as convenções existentes no projeto.\n- Evite modificações que não estejam relacionadas à tarefa.\n\n<span class="accent">## Validação</span>\n\n- Execute verificações relevantes quando forem compatíveis com o ambiente.\n- Nunca declare testes aprovados sem executá-los.\n\n<span class="accent">## Limites</span>\n\n- Não coloque arquitetura ou comandos de um projeto específico aqui.\n- Não copie tutoriais extensos ou procedimentos completos de skills.' },
+        project: { title: 'AGENTS.md · projeto', command: 'cp templates/AGENTS.project.md AGENTS.md', content: '<span class="accent"># Repository Guidelines</span>\n\nEste arquivo deve conter fatos observados no repositório.\n\n<span class="accent">## Propósito</span>\n\n[Descreva o objetivo e o escopo do projeto.]\n\n<span class="accent">## Comandos</span>\n\n- `[comando]` — [o que executa ou valida]\n\n<span class="accent">## Restrições</span>\n\n- [Segurança, compatibilidade ou arquivos que não devem ser alterados.]\n\n<span class="accent">## Contexto adicional</span>\n\nConsulte documentos duradouros somente quando forem relevantes. Não inclua secrets ou histórico de sessões.' },
+        web: { title: 'AGENTS.md · react-vite-typescript', command: 'cp templates/agents/react-vite-typescript.md AGENTS.md', content: '<span class="accent"># Repository Guidelines</span>\n\nEste repositório é uma aplicação SPA com Vite, React e TypeScript.\n\n<span class="accent">## Estrutura do projeto</span>\n\n- `src/`: código da aplicação.\n- `src/components/`: componentes reutilizáveis.\n- `src/hooks/`: hooks compartilhados.\n- `src/main.tsx`: ponto de entrada.\n\n<span class="accent">## Comandos</span>\n\n`npm install` · `npm run dev` · `npm run lint` · `npm run test` · `npm run build`\n\n<span class="accent">## Padrões React e TypeScript</span>\n\n- Use componentes funcionais e TypeScript.\n- Evite `any` e preserve a arquitetura existente.\n- Verifique mudanças visuais em desktop e mobile.' },
+        api: { title: 'AGENTS.md · node-typescript-api', command: 'cp templates/agents/node-typescript-api.md AGENTS.md', content: '<span class="accent"># Repository Guidelines</span>\n\nEste repositório é uma API Node.js/TypeScript.\n\n<span class="accent">## Estrutura do projeto</span>\n\n- `src/routes/`: entradas HTTP.\n- `src/services/`: casos de uso.\n- `src/schemas/`: contratos.\n- `tests/`: testes por camada.\n\n<span class="accent">## API e domínio</span>\n\n- Valide entradas na fronteira.\n- Preserve status codes e formato de erro.\n- Mantenha integrações atrás das interfaces existentes.' },
+        service: { title: 'AGENTS.md · java-spring-boot', command: 'cp templates/agents/java-spring-boot.md AGENTS.md', content: '<span class="accent"># Repository Guidelines</span>\n\nEste repositório é uma aplicação Java com Spring Boot.\n\n<span class="accent">## Estrutura do projeto</span>\n\n- `controller/`: entrada HTTP.\n- `service/`: aplicação e regras.\n- `repository/`: persistência.\n- `src/test/`: testes.\n\n<span class="accent">## Comandos</span>\n\n`./mvnw test` · `./mvnw verify` · `./mvnw spring-boot:run`\n\n- Use constructor injection.\n- Preserve DTOs, validação e formato de erro.' },
+        monorepo: { title: 'AGENTS.md · monorepo-typescript', command: 'cp templates/agents/monorepo-typescript.md AGENTS.md', content: '<span class="accent"># Repository Guidelines</span>\n\nEste repositório é um monorepo TypeScript.\n\n<span class="accent">## Estrutura do projeto</span>\n\n- `apps/`: aplicações.\n- `packages/`: bibliotecas compartilhadas.\n- `tooling/`: lint, TypeScript e build.\n\n<span class="accent">## Dependências e fronteiras</span>\n\n- Atualize o lockfile com alterações de dependência.\n- Não viole fronteiras entre apps e packages.\n- Teste o pacote alterado e seus consumidores.' }
+      };
+      const modelCards = document.querySelectorAll('.model-card');
+      const previewTitle = document.querySelector('#preview-title');
+      const previewContent = document.querySelector('#preview-content');
+      const copyModel = document.querySelector('#copy-model');
+      function selectModel(model) { const preview = modelPreviews[model]; if (!preview) return; modelCards.forEach((card) => { const selected = card.dataset.model === model; card.classList.toggle('selected', selected); card.setAttribute('aria-pressed', selected); }); previewTitle.textContent = preview.title; previewContent.innerHTML = preview.content; copyModel.dataset.copy = preview.command; }
+      modelCards.forEach((card) => { card.addEventListener('click', () => selectModel(card.dataset.model)); card.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectModel(card.dataset.model); } }); });
+      const root = document.documentElement;
+      const themeToggle = document.querySelector('#theme-toggle');
+      const themeLabel = document.querySelector('#theme-label');
+      const themeIcon = document.querySelector('#theme-icon');
+      const savedTheme = localStorage.getItem('codex-workflow-theme');
+      if (savedTheme === 'light') root.dataset.theme = 'light';
+      function updateThemeButton() { const isLight = root.dataset.theme === 'light'; themeLabel.textContent = isLight ? 'Black mode' : 'Light mode'; themeIcon.textContent = isLight ? '◐' : '☼'; themeToggle.setAttribute('aria-label', isLight ? 'Mudar para tema black' : 'Mudar para tema claro'); }
+      updateThemeButton();
+      themeToggle.addEventListener('click', () => { const next = root.dataset.theme === 'light' ? 'black' : 'light'; if (next === 'black') delete root.dataset.theme; else root.dataset.theme = next; localStorage.setItem('codex-workflow-theme', next); updateThemeButton(); });
+    </script>
+  </body>
+</html>
